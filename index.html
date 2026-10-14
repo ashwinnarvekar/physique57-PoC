@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Employee Request Management System — Physique 57</title>
+<style>
+:root {
+  --navy: #1a2744;
+  --blue: #3b5998;
+  --blue-light: #e8edf5;
+  --accent: #4a7cff;
+  --accent-hover: #3561db;
+  --green: #22a85b;
+  --amber: #e6a817;
+  --red: #d93636;
+  --gray-50: #f8f9fb;
+  --gray-100: #f0f2f5;
+  --gray-200: #dde1e8;
+  --gray-400: #9aa3b0;
+  --gray-600: #5a6577;
+  --gray-800: #2d3748;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(26,39,68,.08), 0 1px 2px rgba(26,39,68,.04);
+  --shadow-md: 0 4px 12px rgba(26,39,68,.1);
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --navy: #0f1829;
+    --blue-light: #1e2a42;
+    --gray-50: #111827;
+    --gray-100: #1a2236;
+    --gray-200: #2a3550;
+    --gray-400: #6b7a90;
+    --gray-600: #a0aab8;
+    --gray-800: #e2e8f0;
+    --shadow: 0 1px 3px rgba(0,0,0,.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"] {
+  --navy: #0f1829;
+  --blue-light: #1e2a42;
+  --gray-50: #111827;
+  --gray-100: #1a2236;
+  --gray-200: #2a3550;
+  --gray-400: #6b7a90;
+  --gray-600: #a0aab8;
+  --gray-800: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+* { box-sizing: inherit; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-800);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* Layout */
+.app-header {
+  background: var(--navy);
+  color: #fff;
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 100;
+}
+.app-header h1 { font-size: 16px; font-weight: 600; letter-spacing: .3px; }
+.app-header .subtitle { font-size: 11px; opacity: .65; margin-top: 1px; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo-mark {
+  width: 32px; height: 32px; border-radius: 6px;
+  background: var(--accent); display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; color: #fff;
+}
+
+nav {
+  background: var(--gray-100);
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  gap: 0;
+  padding: 0 24px;
+  overflow-x: auto;
+}
+nav button {
+  background: none; border: none; padding: 12px 18px; font-size: 13px;
+  color: var(--gray-600); cursor: pointer; border-bottom: 2px solid transparent;
+  white-space: nowrap; font-weight: 500; transition: all .15s;
+}
+nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+nav button:hover { color: var(--gray-800); }
+
+.main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+/* Cards */
+.card {
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+/* Form */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: 13px; font-weight: 600; color: var(--gray-600); }
+input, select, textarea {
+  padding: 10px 12px; border: 1px solid var(--gray-200); border-radius: 6px;
+  font-size: 14px; background: var(--gray-50); color: var(--gray-800);
+  transition: border-color .15s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,124,255,.12);
+}
+textarea { resize: vertical; min-height: 100px; }
+
+.btn {
+  padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px;
+  font-weight: 600; cursor: pointer; transition: all .15s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+.btn-outline {
+  background: transparent; border: 1px solid var(--gray-200); color: var(--gray-600);
+}
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Auto-categorization indicator */
+.auto-cat-box {
+  background: var(--blue-light);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-top: 8px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+.auto-cat-box.visible { display: flex; }
+.auto-cat-label {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--accent);
+}
+.auto-cat-value { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+.confidence-bar {
+  width: 60px; height: 6px; background: var(--gray-200); border-radius: 3px;
+  overflow: hidden; margin-left: auto;
+}
+.confidence-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width .3s; }
+
+/* Stats row */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--gray-100); border: 1px solid var(--gray-200);
+  border-radius: var(--radius); padding: 16px; text-align: center;
+}
+.stat-number { font-size: 28px; font-weight: 700; color: var(--gray-800); }
+.stat-label { font-size: 11px; color: var(--gray-600); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left; padding: 10px 12px; font-size: 11px;
+  text-transform: uppercase; letter-spacing: .5px;
+  color: var(--gray-400); border-bottom: 1px solid var(--gray-200);
+  font-weight: 600;
+}
+td { padding: 12px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; }
+tr:hover td { background: var(--blue-light); }
+tr { cursor: pointer; }
+
+/* Badges */
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600;
+}
+.badge-open { background: #dbeafe; color: #1d4ed8; }
+.badge-active { background: #fef3c7; color: #92400e; }
+.badge-resolved { background: #d1fae5; color: #065f46; }
+.badge-closed { background: var(--gray-200); color: var(--gray-600); }
+.badge-hr { background: #ede9fe; color: #5b21b6; }
+.badge-it { background: #dbeafe; color: #1d4ed8; }
+.badge-payroll { background: #fce7f3; color: #9d174d; }
+.badge-operations { background: #ffedd5; color: #9a3412; }
+.badge-other { background: var(--gray-200); color: var(--gray-600); }
+
+.priority-dot {
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px;
+}
+.p1 { background: var(--red); }
+.p2 { background: var(--amber); }
+.p3 { background: var(--accent); }
+.p4 { background: var(--gray-400); }
+
+/* Ticket detail */
+.ticket-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.ticket-id { font-size: 13px; color: var(--gray-400); font-family: 'SF Mono', 'Consolas', monospace; }
+.ticket-subject { font-size: 20px; font-weight: 700; margin-top: 4px; }
+.ticket-meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--gray-600); margin-top: 8px; }
+
+.detail-grid { display: grid; grid-template-columns: 1fr 280px; gap: 20px; }
+@media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
+
+.status-flow { display: flex; align-items: center; gap: 0; margin: 16px 0; flex-wrap: wrap; }
+.status-step {
+  padding: 6px 16px; font-size: 12px; font-weight: 600;
+  background: var(--gray-200); color: var(--gray-400); position: relative;
+}
+.status-step:first-child { border-radius: 4px 0 0 4px; }
+.status-step:last-child { border-radius: 0 4px 4px 0; }
+.status-step.current { background: var(--accent); color: #fff; }
+.status-step.done { background: var(--green); color: #fff; }
+
+.sla-indicator {
+  padding: 10px 14px; border-radius: 6px; font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+.sla-ok { background: #d1fae5; color: #065f46; }
+.sla-warn { background: #fef3c7; color: #92400e; }
+.sla-breach { background: #fee2e2; color: #991b1b; }
+
+.activity-log { margin-top: 16px; }
+.log-entry {
+  padding: 10px 0; border-bottom: 1px solid var(--gray-200);
+  font-size: 13px; display: flex; gap: 10px;
+}
+.log-time { color: var(--gray-400); font-size: 11px; white-space: nowrap; font-family: monospace; }
+.log-text { color: var(--gray-600); }
+
+.action-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+/* Filters */
+.filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.filters select, .filters input {
+  padding: 7px 12px; font-size: 13px; border: 1px solid var(--gray-200);
+  border-radius: 6px; background: var(--gray-50); color: var(--gray-800);
+}
+
+/* Analytics */
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 640px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card { background: var(--gray-100); border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 20px; }
+.chart-title { font-size: 14px; font-weight: 700; margin-bottom: 16px; color: var(--gray-800); }
+
+.bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 140px; padding-top: 10px; }
+.bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+.bar {
+  width: 100%; border-radius: 4px 4px 0 0; transition: height .4s ease;
+  min-height: 4px;
+}
+.bar-label { font-size: 11px; color: var(--gray-400); }
+.bar-value { font-size: 12px; font-weight: 700; color: var(--gray-800); }
+
+.donut-chart { display: flex; align-items: center; gap: 20px; }
+.donut-legend { display: flex; flex-direction: column; gap: 6px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--navy); color: #fff; padding: 12px 24px;
+  border-radius: 8px; font-size: 14px; font-weight: 500;
+  box-shadow: var(--shadow-md); z-index: 200;
+  opacity: 0; transition: opacity .3s;
+}
+.toast.show { opacity: 1; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 48px 20px; color: var(--gray-400); }
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-text { font-size: 15px; }
+
+/* Section heading */
+.section-heading {
+  font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--gray-800);
+}
+
+.back-link {
+  font-size: 13px; color: var(--accent); cursor: pointer;
+  margin-bottom: 12px; display: inline-block;
+}
+.back-link:hover { text-decoration: underline; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-left">
+    <div class="logo-mark">P57</div>
+    <div>
+      <h1>Request Management System</h1>
+      <div class="subtitle">Employee Service Portal — Physique 57</div>
+    </div>
+  </div>
+  <div style="font-size: 12px; opacity: .6;">PoC v1.0</div>
+</header>
+
+<nav id="mainNav">
+  <button class="active" data-view="submit">Submit Request</button>
+  <button data-view="dashboard">Dashboard</button>
+  <button data-view="analytics">Analytics</button>
+</nav>
+
+<!-- Submit Request -->
+<div class="main" id="view-submit">
+  <div class="card">
+    <div class="section-heading">New Request</div>
+    <form id="requestForm">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="fName" required placeholder="e.g. Priya Sharma">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="fEmail" required placeholder="priya@physique57.in">
+        </div>
+        <div class="form-group">
+          <label>Department</label>
+          <select id="fDept" required>
+            <option value="">Select your department</option>
+            <option>Sales</option>
+            <option>Operations</option>
+            <option>Finance</option>
+            <option>Marketing</option>
+            <option>Client Services</option>
+            <option>Studio Staff</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="fPriority">
+            <option value="auto">Auto-detect</option>
+            <option value="P1">P1 — Critical (SLA: 4h)</option>
+            <option value="P2">P2 — High (SLA: 8h)</option>
+            <option value="P3">P3 — Medium (SLA: 24h)</option>
+            <option value="P4">P4 — Low (SLA: 48h)</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Subject</label>
+          <input type="text" id="fSubject" required placeholder="Brief summary of your request" oninput="runAutoClassify()">
+        </div>
+        <div class="form-group full">
+          <label>Description</label>
+          <textarea id="fDesc" placeholder="Provide details about your request..." oninput="runAutoClassify()"></textarea>
+        </div>
+
+        <div class="auto-cat-box" id="autoCatBox">
+          <div>
+            <div class="auto-cat-label">Auto-classified</div>
+            <div class="auto-cat-value" id="autoCatValue">—</div>
+          </div>
+          <div style="margin-left:auto; text-align:right;">
+            <div style="font-size:11px; color:var(--gray-400);">Confidence</div>
+            <div class="confidence-bar"><div class="confidence-fill" id="confFill"></div></div>
+          </div>
+        </div>
+
+        <div class="form-group full" style="flex-direction:row; justify-content:flex-end; gap:10px; margin-top:8px;">
+          <button type="reset" class="btn btn-outline" onclick="resetForm()">Clear</button>
+          <button type="submit" class="btn btn-primary">Submit Request</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="main hidden" id="view-dashboard">
+  <div class="stats-row" id="statsRow"></div>
+
+  <div class="filters">
+    <select id="filterStatus" onchange="renderDashboard()">
+      <option value="">All Statuses</option>
+      <option value="Open">Open</option>
+      <option value="In Progress">In Progress</option>
+      <option value="Resolved">Resolved</option>
+      <option value="Closed">Closed</option>
+    </select>
+    <select id="filterCategory" onchange="renderDashboard()">
+      <option value="">All Categories</option>
+      <option>HR</option>
+      <option>IT</option>
+      <option>Payroll</option>
+      <option>Operations</option>
+      <option>Other</option>
+    </select>
+    <input type="text" id="filterSearch" placeholder="Search tickets..." oninput="renderDashboard()">
+  </div>
+
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ticket ID</th>
+            <th>Subject</th>
+            <th>Source</th>
+            <th>Category</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>SLA</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody id="ticketTable"></tbody>
+      </table>
+    </div>
+    <div class="empty-state hidden" id="emptyDash">
+      <div class="empty-icon">📋</div>
+      <div class="empty-text">No tickets yet. Submit a request to get started.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Ticket Detail -->
+<div class="main hidden" id="view-detail">
+  <span class="back-link" onclick="showView('dashboard')">← Back to Dashboard</span>
+  <div id="detailContent"></div>
+</div>
+
+<!-- Analytics -->
+<div class="main hidden" id="view-analytics">
+  <div class="section-heading">System Analytics</div>
+  <div class="stats-row" id="analyticsStats"></div>
+  <div class="chart-grid" id="chartGrid"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Data Store ──
+let tickets = [];
+let ticketCounter = 0;
+
+const DATA_VERSION = '2';
+try {
+  const ver = localStorage.getItem('p57_version');
+  if (ver === DATA_VERSION) {
+    const saved = localStorage.getItem('p57_tickets');
+    const savedCounter = localStorage.getItem('p57_counter');
+    if (saved) tickets = JSON.parse(saved);
+    if (savedCounter) ticketCounter = parseInt(savedCounter);
+  } else {
+    localStorage.removeItem('p57_tickets');
+    localStorage.removeItem('p57_counter');
+  }
+} catch(e) {}
+
+function persist() {
+  try {
+    localStorage.setItem('p57_tickets', JSON.stringify(tickets));
+    localStorage.setItem('p57_counter', ticketCounter.toString());
+    localStorage.setItem('p57_version', DATA_VERSION);
+  } catch(e) {}
+}
+
+// ── Auto-Categorization Engine ──
+const categoryRules = {
+  HR: {
+    keywords: ['leave','vacation','attendance','policy','onboarding','offboarding','benefits','resignation','transfer','promotion','appraisal','holiday','sick','maternity','paternity','probation','confirmation','warning','disciplinary','hr','hiring','recruitment','interview','offer letter','joining','exit','relieving','experience letter','wfh','work from home','comp off'],
+    weight: 1
+  },
+  IT: {
+    keywords: ['laptop','computer','software','access','password','vpn','printer','hardware','tech','login','email','network','wifi','install','update','crash','bug','system','server','monitor','mouse','keyboard','outlook','teams','slack','it','reset','unlock','permission','admin','firewall','antivirus','license','charger','headset','webcam','zoom'],
+    weight: 1
+  },
+  Payroll: {
+    keywords: ['salary','reimbursement','tax','payslip','deduction','bonus','pf','provident fund','tds','form 16','compensation','incentive','overtime','arrears','advance','loan','payment','esic','gratuity','hra','medical claim','expense','invoice','payroll','ctc','increment','hike'],
+    weight: 1
+  },
+  Operations: {
+    keywords: ['office','supplies','facilities','maintenance','parking','id card','badge','desk','chair','ac','air conditioning','cleaning','security','visitor','cab','transport','cafeteria','pantry','keys','locker','stationery','courier','relocation','seating','repairs','plumbing','electrical','pest control','housekeeping'],
+    weight: 1
+  }
+};
+
+const priorityKeywords = {
+  P1: ['urgent','critical','down','blocked','emergency','immediately','asap','not working','outage','crash','broken'],
+  P2: ['important','high priority','soon','failing','issue','error','problem'],
+  P4: ['low','whenever','no rush','fyi','minor','cosmetic','nice to have','suggestion']
+};
+
+function classify(text) {
+  const lower = text.toLowerCase();
+  const scores = {};
+  let maxScore = 0;
+  let bestCategory = 'Other';
+
+  for (const [cat, config] of Object.entries(categoryRules)) {
+    let score = 0;
+    for (const kw of config.keywords) {
+      if (lower.includes(kw)) {
+        score += kw.split(' ').length; // multi-word matches score higher
+      }
+    }
+    scores[cat] = score;
+    if (score > maxScore) {
+      maxScore = score;
+      bestCategory = cat;
+    }
+  }
+
+  const totalHits = Object.values(scores).reduce((a, b) => a + b, 0);
+  const confidence = totalHits > 0 ? Math.min((maxScore / Math.max(totalHits, 1)) * (Math.min(maxScore, 5) / 5) * 100, 98) : 0;
+
+  return { category: maxScore > 0 ? bestCategory : 'Other', confidence: Math.round(confidence) };
+}
+
+function detectPriority(text) {
+  const lower = text.toLowerCase();
+  for (const kw of priorityKeywords.P1) { if (lower.includes(kw)) return 'P1'; }
+  for (const kw of priorityKeywords.P2) { if (lower.includes(kw)) return 'P2'; }
+  for (const kw of priorityKeywords.P4) { if (lower.includes(kw)) return 'P4'; }
+  return 'P3';
+}
+
+function generateTicketId() {
+  ticketCounter++;
+  const d = new Date();
+  const yr = d.getFullYear();
+  const seq = String(ticketCounter).padStart(4, '0');
+  return `REQ-${yr}-${seq}`;
+}
+
+const slaHours = { P1: 4, P2: 8, P3: 24, P4: 48 };
+
+const departmentOwners = {
+  HR: 'HR Team',
+  IT: 'IT Helpdesk',
+  Payroll: 'Payroll Team',
+  Operations: 'Facilities Team',
+  Other: 'Admin Pool'
+};
+
+// ── Auto-classify UI ──
+let classifyTimeout;
+function runAutoClassify() {
+  clearTimeout(classifyTimeout);
+  classifyTimeout = setTimeout(() => {
+    const text = (document.getElementById('fSubject').value + ' ' + document.getElementById('fDesc').value).trim();
+    const box = document.getElementById('autoCatBox');
+    if (text.length < 5) { box.classList.remove('visible'); return; }
+    const result = classify(text);
+    document.getElementById('autoCatValue').textContent = result.category + ' → Routed to ' + departmentOwners[result.category];
+    document.getElementById('confFill').style.width = result.confidence + '%';
+    box.classList.add('visible');
+  }, 300);
+}
+
+// ── Form Submission ──
+document.getElementById('requestForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const text = document.getElementById('fSubject').value + ' ' + document.getElementById('fDesc').value;
+  const classification = classify(text);
+  const manualPriority = document.getElementById('fPriority').value;
+  const priority = manualPriority === 'auto' ? detectPriority(text) : manualPriority;
+
+  const ticket = {
+    id: generateTicketId(),
+    name: document.getElementById('fName').value,
+    email: document.getElementById('fEmail').value,
+    dept: document.getElementById('fDept').value,
+    subject: document.getElementById('fSubject').value,
+    description: document.getElementById('fDesc').value,
+    category: classification.category,
+    confidence: classification.confidence,
+    priority: priority,
+    status: 'Open',
+    assignedTo: departmentOwners[classification.category],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    slaDeadline: new Date(Date.now() + slaHours[priority] * 3600000).toISOString(),
+    log: [
+      { time: new Date().toISOString(), text: 'Request submitted via portal' },
+      { time: new Date().toISOString(), text: `Auto-classified as ${classification.category} (confidence: ${classification.confidence}%)` },
+      { time: new Date().toISOString(), text: `Priority set to ${priority} — SLA: ${slaHours[priority]}h` },
+      { time: new Date().toISOString(), text: `Routed to ${departmentOwners[classification.category]}` }
+    ]
+  };
+
+  tickets.unshift(ticket);
+  persist();
+  resetForm();
+  showToast(`Ticket ${ticket.id} created and routed to ${ticket.assignedTo}`);
+  showView('dashboard');
+});
+
+function resetForm() {
+  document.getElementById('requestForm').reset();
+  document.getElementById('autoCatBox').classList.remove('visible');
+}
+
+// ── Navigation ──
+function showView(name) {
+  document.querySelectorAll('[id^="view-"]').forEach(v => v.classList.add('hidden'));
+  document.getElementById('view-' + name).classList.remove('hidden');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  const navBtn = document.querySelector(`nav button[data-view="${name}"]`);
+  if (navBtn) navBtn.classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'analytics') renderAnalytics();
+}
+
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => showView(btn.dataset.view));
+});
+
+// ── Dashboard ──
+function getSlaStatus(ticket) {
+  if (ticket.status === 'Resolved' || ticket.status === 'Closed') return 'ok';
+  const now = new Date();
+  const deadline = new Date(ticket.slaDeadline);
+  const remaining = deadline - now;
+  if (remaining < 0) return 'breach';
+  if (remaining < 3600000) return 'warn';
+  return 'ok';
+}
+
+function formatSla(ticket) {
+  if (ticket.status === 'Resolved' || ticket.status === 'Closed') return '✓ Met';
+  const now = new Date();
+  const deadline = new Date(ticket.slaDeadline);
+  const diff = deadline - now;
+  if (diff < 0) {
+    const overdue = Math.abs(diff);
+    const h = Math.floor(overdue / 3600000);
+    const m = Math.floor((overdue % 3600000) / 60000);
+    return `⚠ ${h}h ${m}m overdue`;
+  }
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  return `${h}h ${m}m left`;
+}
+
+function formatTime(iso) {
+  const d = new Date(iso);
+  const day = d.getDate();
+  const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+  const h = d.getHours();
+  const m = String(d.getMinutes()).padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  return `${day} ${mon}, ${h % 12 || 12}:${m} ${ampm}`;
+}
+
+function renderDashboard() {
+  const statusFilter = document.getElementById('filterStatus').value;
+  const catFilter = document.getElementById('filterCategory').value;
+  const search = document.getElementById('filterSearch').value.toLowerCase();
+
+  let filtered = tickets.filter(t => {
+    if (statusFilter && t.status !== statusFilter) return false;
+    if (catFilter && t.category !== catFilter) return false;
+    if (search && !t.id.toLowerCase().includes(search) && !t.subject.toLowerCase().includes(search) && !t.name.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  // Stats
+  const open = tickets.filter(t => t.status === 'Open').length;
+  const active = tickets.filter(t => t.status === 'In Progress').length;
+  const resolved = tickets.filter(t => t.status === 'Resolved').length;
+  const breached = tickets.filter(t => getSlaStatus(t) === 'breach').length;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="stat-number">${tickets.length}</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-number" style="color:var(--accent)">${open}</div><div class="stat-label">Open</div></div>
+    <div class="stat-card"><div class="stat-number" style="color:var(--amber)">${active}</div><div class="stat-label">In Progress</div></div>
+    <div class="stat-card"><div class="stat-number" style="color:var(--green)">${resolved}</div><div class="stat-label">Resolved</div></div>
+    <div class="stat-card"><div class="stat-number" style="color:var(--red)">${breached}</div><div class="stat-label">SLA Breached</div></div>
+  `;
+
+  const tbody = document.getElementById('ticketTable');
+  const empty = document.getElementById('emptyDash');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  tbody.innerHTML = filtered.map(t => {
+    const sla = getSlaStatus(t);
+    const slaClass = sla === 'breach' ? 'sla-breach' : sla === 'warn' ? 'sla-warn' : 'sla-ok';
+    const statusClass = t.status === 'Open' ? 'badge-open' : t.status === 'In Progress' ? 'badge-active' : t.status === 'Resolved' ? 'badge-resolved' : 'badge-closed';
+    const catClass = 'badge-' + t.category.toLowerCase();
+    return `<tr onclick="showTicket('${t.id}')">
+      <td><span style="font-family:monospace;font-size:12px;">${t.id}</span></td>
+      <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.subject}</td>
+      <td style="font-size:12px;color:var(--gray-600);">${t.channel || 'Portal'}</td>
+      <td><span class="badge ${catClass}">${t.category}</span></td>
+      <td><span class="priority-dot ${t.priority.toLowerCase()}"></span>${t.priority}</td>
+      <td><span class="badge ${statusClass}">${t.status}</span></td>
+      <td style="font-size:12px;" class="${slaClass.replace('sla-','')}">${formatSla(t)}</td>
+      <td style="font-size:12px;color:var(--gray-400);">${formatTime(t.createdAt)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Ticket Detail ──
+function showTicket(id) {
+  const t = tickets.find(x => x.id === id);
+  if (!t) return;
+
+  const sla = getSlaStatus(t);
+  const slaClass = sla === 'breach' ? 'sla-breach' : sla === 'warn' ? 'sla-warn' : 'sla-ok';
+  const statuses = ['Open', 'In Progress', 'Resolved', 'Closed'];
+  const currentIdx = statuses.indexOf(t.status);
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="card">
+      <div class="ticket-header">
+        <div>
+          <div class="ticket-id">${t.id}</div>
+          <div class="ticket-subject">${t.subject}</div>
+          <div class="ticket-meta">
+            <span>By: ${t.name}</span>
+            <span>Dept: ${t.dept}</span>
+            <span>Source: ${t.channel || 'Portal'}</span>
+            <span>Assigned: ${t.assignedTo}</span>
+          </div>
+        </div>
+        <div>
+          <span class="badge badge-${t.category.toLowerCase()}">${t.category}</span>
+          <span style="margin-left:4px;"><span class="priority-dot ${t.priority.toLowerCase()}"></span>${t.priority}</span>
+        </div>
+      </div>
+
+      <div class="status-flow">
+        ${statuses.map((s, i) => {
+          let cls = '';
+          if (i < currentIdx) cls = 'done';
+          else if (i === currentIdx) cls = 'current';
+          return `<div class="status-step ${cls}">${s}</div>`;
+        }).join('')}
+      </div>
+
+      <div class="sla-indicator ${slaClass}" style="margin-bottom:16px;">
+        SLA: ${formatSla(t)} &nbsp;|&nbsp; Deadline: ${formatTime(t.slaDeadline)} &nbsp;|&nbsp; ${slaHours[t.priority]}h window (${t.priority})
+      </div>
+
+      <div class="detail-grid">
+        <div>
+          <div style="font-weight:600;margin-bottom:8px;">Description</div>
+          <p style="font-size:14px;color:var(--gray-600);line-height:1.7;">${t.description || '(No description provided)'}</p>
+
+          <div class="action-buttons">
+            ${t.status === 'Open' ? `<button class="btn btn-primary btn-sm" onclick="advanceStatus('${t.id}','In Progress')">Start Working</button>` : ''}
+            ${t.status === 'In Progress' ? `<button class="btn btn-primary btn-sm" onclick="advanceStatus('${t.id}','Resolved')">Mark Resolved</button>` : ''}
+            ${t.status === 'Resolved' ? `<button class="btn btn-primary btn-sm" onclick="advanceStatus('${t.id}','Closed')">Close Ticket</button>` : ''}
+            ${t.status !== 'Closed' && sla === 'breach' ? `<button class="btn btn-sm" style="background:var(--red);color:#fff;" onclick="escalateTicket('${t.id}')">Escalate</button>` : ''}
+          </div>
+        </div>
+        <div>
+          <div style="font-weight:600;margin-bottom:8px;">Activity Log</div>
+          <div class="activity-log">
+            ${t.log.map(l => `
+              <div class="log-entry">
+                <span class="log-time">${formatTime(l.time)}</span>
+                <span class="log-text">${l.text}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  showView('detail');
+}
+
+function advanceStatus(id, newStatus) {
+  const t = tickets.find(x => x.id === id);
+  if (!t) return;
+  t.status = newStatus;
+  t.updatedAt = new Date().toISOString();
+  t.log.push({ time: new Date().toISOString(), text: `Status changed to ${newStatus}` });
+  persist();
+  showTicket(id);
+  showToast(`${t.id} moved to ${newStatus}`);
+}
+
+function escalateTicket(id) {
+  const t = tickets.find(x => x.id === id);
+  if (!t) return;
+  t.priority = 'P1';
+  t.log.push({ time: new Date().toISOString(), text: '⚠ Escalated — SLA breach detected. Reassigned to department head.' });
+  t.assignedTo = t.assignedTo + ' (Escalated to Head)';
+  persist();
+  showTicket(id);
+  showToast(`${t.id} escalated to department head`);
+}
+
+// ── Analytics ──
+function renderAnalytics() {
+  const total = tickets.length;
+  const resolved = tickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
+  const avgResTime = resolved > 0
+    ? tickets.filter(t => t.status === 'Resolved' || t.status === 'Closed')
+        .reduce((sum, t) => sum + (new Date(t.updatedAt) - new Date(t.createdAt)), 0) / resolved / 3600000
+    : 0;
+  const slaBreaches = tickets.filter(t => getSlaStatus(t) === 'breach').length;
+  const slaRate = total > 0 ? Math.round(((total - slaBreaches) / total) * 100) : 100;
+
+  document.getElementById('analyticsStats').innerHTML = `
+    <div class="stat-card"><div class="stat-number">${total}</div><div class="stat-label">Total Tickets</div></div>
+    <div class="stat-card"><div class="stat-number" style="color:var(--green)">${resolved}</div><div class="stat-label">Resolved</div></div>
+    <div class="stat-card"><div class="stat-number">${avgResTime.toFixed(1)}h</div><div class="stat-label">Avg Resolution</div></div>
+    <div class="stat-card"><div class="stat-number" style="color:${slaRate>=90?'var(--green)':'var(--red)'}">${slaRate}%</div><div class="stat-label">SLA Compliance</div></div>
+  `;
+
+  // Category distribution
+  const catCounts = { HR: 0, IT: 0, Payroll: 0, Operations: 0, Other: 0 };
+  tickets.forEach(t => { catCounts[t.category] = (catCounts[t.category] || 0) + 1; });
+  const catColors = { HR: '#7c3aed', IT: '#3b82f6', Payroll: '#ec4899', Operations: '#f97316', Other: '#6b7280' };
+  const maxCat = Math.max(...Object.values(catCounts), 1);
+
+  // Priority distribution
+  const priCounts = { P1: 0, P2: 0, P3: 0, P4: 0 };
+  tickets.forEach(t => { priCounts[t.priority] = (priCounts[t.priority] || 0) + 1; });
+  const priColors = { P1: '#d93636', P2: '#e6a817', P3: '#4a7cff', P4: '#9aa3b0' };
+  const maxPri = Math.max(...Object.values(priCounts), 1);
+
+  document.getElementById('chartGrid').innerHTML = `
+    <div class="chart-card">
+      <div class="chart-title">Tickets by Category</div>
+      <div class="bar-chart">
+        ${Object.entries(catCounts).map(([cat, count]) => `
+          <div class="bar-col">
+            <div class="bar-value">${count}</div>
+            <div class="bar" style="height:${(count/maxCat)*110}px; background:${catColors[cat]};"></div>
+            <div class="bar-label">${cat}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Tickets by Priority</div>
+      <div class="bar-chart">
+        ${Object.entries(priCounts).map(([pri, count]) => `
+          <div class="bar-col">
+            <div class="bar-value">${count}</div>
+            <div class="bar" style="height:${(count/maxPri)*110}px; background:${priColors[pri]};"></div>
+            <div class="bar-label">${pri}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Status Distribution</div>
+      <div class="donut-legend">
+        ${['Open','In Progress','Resolved','Closed'].map(s => {
+          const colors = { Open: '#3b82f6', 'In Progress': '#f59e0b', Resolved: '#10b981', Closed: '#6b7280' };
+          const count = tickets.filter(t => t.status === s).length;
+          return `<div class="legend-item"><div class="legend-dot" style="background:${colors[s]};"></div>${s}: ${count} (${total > 0 ? Math.round(count/total*100) : 0}%)</div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">SLA Health</div>
+      <div class="donut-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div>Within SLA: ${total - slaBreaches}</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red);"></div>Breached: ${slaBreaches}</div>
+        <div style="margin-top:12px; font-size:13px; color:var(--gray-600);">
+          SLA compliance rate: <strong>${slaRate}%</strong>
+        </div>
+      </div>
+    </div>
+  `;
+
+  if (total === 0) {
+    document.getElementById('chartGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📊</div><div class="empty-text">Submit some requests to see analytics.</div></div>`;
+  }
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── Seed Demo Data ──
+if (tickets.length === 0) {
+  const demoTickets = [
+    { name: 'Riya Patel', email: 'riya@physique57.in', dept: 'Studio Staff', subject: 'Laptop not connecting to studio Wi-Fi', description: 'My laptop cannot connect to the studio network since this morning. I have tried restarting but it keeps showing "No internet".', priority: 'P2', channel: 'Web Portal' },
+    { name: 'Arjun Mehta', email: 'arjun@physique57.in', dept: 'Finance', subject: 'Reimbursement for client event expenses', description: 'I need to submit reimbursement for the client appreciation event held last week. Total amount is Rs. 15,400. Receipts attached.', priority: 'P3', channel: 'Email' },
+    { name: 'Sneha Kumar', email: 'sneha@physique57.in', dept: 'Client Services', subject: 'Request for 3 days casual leave', description: 'Requesting casual leave from Nov 10-12 for a family function. All pending tasks have been handed over to Priya.', priority: 'P4', channel: 'WhatsApp' },
+    { name: 'Vikram Shah', email: 'vikram@physique57.in', dept: 'Operations', subject: 'AC not working in Studio 2 — urgent', description: 'The air conditioning in Studio 2 has completely stopped. Classes are scheduled all day and clients are complaining. This needs immediate attention.', priority: 'auto', channel: 'SMS' },
+    { name: 'Neha Joshi', email: 'neha@physique57.in', dept: 'Marketing', subject: 'Need admin access to social media dashboard', description: 'I need admin-level access to the Sprout Social dashboard for scheduling next month\'s campaign posts. Currently I only have viewer access.', priority: 'P3', channel: 'Walk-in' },
+    { name: 'Aditya Rao', email: 'aditya@physique57.in', dept: 'Sales', subject: 'Payslip discrepancy for September', description: 'My September payslip shows a deduction of Rs. 4,200 under "Other Deductions" which I cannot identify. Please clarify or correct.', priority: 'P2', channel: 'Email' },
+  ];
+
+  demoTickets.forEach((d, i) => {
+    const text = d.subject + ' ' + d.description;
+    const classification = classify(text);
+    const priority = d.priority === 'auto' ? detectPriority(text) : d.priority;
+    const createdAt = new Date(Date.now() - (i * 3600000 * (2 + Math.random() * 6)));
+
+    const ticket = {
+      id: generateTicketId(),
+      name: d.name,
+      email: d.email,
+      dept: d.dept,
+      subject: d.subject,
+      description: d.description,
+      category: classification.category,
+      confidence: classification.confidence,
+      priority: priority,
+      status: ['Open', 'Open', 'In Progress', 'Open', 'Open', 'Resolved'][i],
+      assignedTo: departmentOwners[classification.category],
+      createdAt: createdAt.toISOString(),
+      updatedAt: createdAt.toISOString(),
+      slaDeadline: new Date(createdAt.getTime() + slaHours[priority] * 3600000).toISOString(),
+      channel: d.channel,
+      log: [
+        { time: createdAt.toISOString(), text: `Request submitted via ${d.channel}` },
+        { time: createdAt.toISOString(), text: `Auto-classified as ${classification.category} (confidence: ${classification.confidence}%)` },
+        { time: createdAt.toISOString(), text: `Priority set to ${priority} — SLA: ${slaHours[priority]}h` },
+        { time: createdAt.toISOString(), text: `Routed to ${departmentOwners[classification.category]}` },
+      ]
+    };
+
+    if (i === 2) {
+      ticket.log.push({ time: new Date(createdAt.getTime() + 1800000).toISOString(), text: 'Status changed to In Progress' });
+    }
+    if (i === 5) {
+      ticket.log.push({ time: new Date(createdAt.getTime() + 7200000).toISOString(), text: 'Status changed to Resolved' });
+    }
+
+    tickets.push(ticket);
+  });
+  persist();
+}
+</script>
+</body>
+</html>

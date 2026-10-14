@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Workflow Diagram — Employee Request Management System</title>
+<style>
+:root {
+  --navy: #1a2744;
+  --bg: #f8f9fb;
+  --card: #fff;
+  --border: #e2e6ed;
+  --text: #2d3748;
+  --text-muted: #6b7a8d;
+  --accent: #4a7cff;
+  --green: #22a85b;
+  --amber: #e6a817;
+  --red: #d93636;
+  --purple: #7c3aed;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --navy: #0f1829; --bg: #111827; --card: #1a2236;
+    --border: #2a3550; --text: #e2e8f0; --text-muted: #94a3b8;
+  }
+}
+:root[data-theme="dark"] {
+  --navy: #0f1829; --bg: #111827; --card: #1a2236;
+  --border: #2a3550; --text: #e2e8f0; --text-muted: #94a3b8;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+* { box-sizing: inherit; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; line-height: 1.5;
+}
+
+header {
+  background: var(--navy); color: #fff;
+  padding: 20px 24px;
+  text-align: center;
+}
+header h1 { font-size: 18px; font-weight: 700; }
+header p { font-size: 12px; opacity: .6; margin-top: 4px; }
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.diagram-title {
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.flow-section {
+  margin-bottom: 32px;
+}
+.section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+
+/* Flow nodes */
+.flow-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.node {
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  background: var(--card);
+  min-width: 120px;
+  position: relative;
+}
+.node-sm {
+  font-size: 11px;
+  padding: 6px 12px;
+  min-width: 90px;
+}
+.node-channel { border-color: #93c5fd; background: #eff6ff; color: #1e40af; }
+.node-process { border-color: var(--accent); background: #eef2ff; color: #3730a3; }
+.node-decision {
+  border-color: var(--amber);
+  background: #fffbeb;
+  color: #92400e;
+  border-radius: 4px;
+  transform: rotate(0deg);
+}
+.node-route { border-color: var(--purple); background: #f5f3ff; color: #5b21b6; }
+.node-action { border-color: var(--green); background: #ecfdf5; color: #065f46; }
+.node-alert { border-color: var(--red); background: #fef2f2; color: #991b1b; }
+.node-end { border-color: var(--text-muted); background: var(--card); color: var(--text-muted); border-radius: 20px; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .node-channel { background: #1e3a5f; color: #93c5fd; }
+  :root:not([data-theme="light"]) .node-process { background: #1e2a5f; color: #a5b4fc; }
+  :root:not([data-theme="light"]) .node-decision { background: #422006; color: #fbbf24; }
+  :root:not([data-theme="light"]) .node-route { background: #2e1065; color: #c4b5fd; }
+  :root:not([data-theme="light"]) .node-action { background: #064e3b; color: #6ee7b7; }
+  :root:not([data-theme="light"]) .node-alert { background: #450a0a; color: #fca5a5; }
+}
+
+.arrow {
+  color: var(--text-muted);
+  font-size: 18px;
+  font-weight: 400;
+}
+.arrow-down {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 20px;
+  margin: 6px 0;
+}
+
+.branch-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 8px 0;
+}
+@media (max-width: 640px) {
+  .branch-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.branch-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.sub-note {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 100px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.legend-swatch {
+  width: 14px; height: 14px;
+  border-radius: 3px;
+  border: 1.5px solid;
+}
+.sw-channel { background: #eff6ff; border-color: #93c5fd; }
+.sw-process { background: #eef2ff; border-color: var(--accent); }
+.sw-decision { background: #fffbeb; border-color: var(--amber); }
+.sw-route { background: #f5f3ff; border-color: var(--purple); }
+.sw-action { background: #ecfdf5; border-color: var(--green); }
+.sw-alert { background: #fef2f2; border-color: var(--red); }
+
+.detail-section {
+  margin-top: 32px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+.detail-section h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 640px) {
+  .detail-grid { grid-template-columns: 1fr; }
+}
+.detail-card {
+  padding: 12px;
+  background: var(--bg);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.detail-card h4 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.detail-card p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Employee Request Management System</h1>
+  <p>End-to-End Workflow Architecture — Physique 57</p>
+</header>
+
+<div class="container">
+  <div class="diagram-title">Request Lifecycle — Workflow Schematic</div>
+
+  <!-- STAGE 1: Intake -->
+  <div class="flow-section">
+    <div class="section-label">Stage 1 — Omni-Channel Request Intake</div>
+    <div class="flow-row">
+      <div class="node node-sm node-channel">Email</div>
+      <div class="node node-sm node-channel">WhatsApp</div>
+      <div class="node node-sm node-channel">SMS</div>
+      <div class="node node-sm node-channel">Web Portal</div>
+      <div class="node node-sm node-channel">Walk-in / DM</div>
+    </div>
+    <div class="arrow-down">↓ all channels funnel into ↓</div>
+    <div class="flow-row">
+      <div class="node node-process">Unified Intake Layer<br><span style="font-size:10px;font-weight:400;">Standardized request object created</span></div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row">
+      <div class="node node-action">Generate Ticket ID<br><span style="font-size:10px;font-weight:400;">REQ-YYYY-XXXX</span></div>
+    </div>
+  </div>
+
+  <!-- STAGE 2: Classification -->
+  <div class="flow-section">
+    <div class="section-label">Stage 2 — Automated Classification & Priority</div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row">
+      <div class="node node-decision">Auto-Categorization Engine<br><span style="font-size:10px;font-weight:400;">Keyword scoring + NLP analysis</span></div>
+    </div>
+    <div class="arrow-down">↓ assigns category + confidence score ↓</div>
+    <div class="branch-container">
+      <div class="branch-col">
+        <div class="node node-sm node-route">HR</div>
+        <div class="sub-note">Leave, policy, onboarding</div>
+      </div>
+      <div class="branch-col">
+        <div class="node node-sm node-route">IT</div>
+        <div class="sub-note">Hardware, access, software</div>
+      </div>
+      <div class="branch-col">
+        <div class="node node-sm node-route">Payroll</div>
+        <div class="sub-note">Salary, tax, reimbursement</div>
+      </div>
+      <div class="branch-col">
+        <div class="node node-sm node-route">Operations</div>
+        <div class="sub-note">Facilities, supplies, parking</div>
+      </div>
+      <div class="branch-col">
+        <div class="node node-sm node-route">Other</div>
+        <div class="sub-note">Unclassified → admin pool</div>
+      </div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row">
+      <div class="node node-decision">Priority Detection<br><span style="font-size:10px;font-weight:400;">P1: 4h | P2: 8h | P3: 24h | P4: 48h</span></div>
+    </div>
+  </div>
+
+  <!-- STAGE 3: Routing -->
+  <div class="flow-section">
+    <div class="section-label">Stage 3 — Dynamic Routing & Assignment</div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row">
+      <div class="node node-process">Department Queue Assignment<br><span style="font-size:10px;font-weight:400;">Category → team owner mapping</span></div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row">
+      <div class="node node-action">Assignee Notification<br><span style="font-size:10px;font-weight:400;">Email + portal alert to owner</span></div>
+      <span class="arrow">+</span>
+      <div class="node node-action">Requester Confirmation<br><span style="font-size:10px;font-weight:400;">Ticket ID + ETA sent to employee</span></div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row">
+      <div class="node node-process" style="border-color:var(--green);">Status: Open</div>
+    </div>
+  </div>
+
+  <!-- STAGE 4: Processing & Escalation -->
+  <div class="flow-section">
+    <div class="section-label">Stage 4 — Processing, SLA Monitoring & Escalation</div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row">
+      <div class="node node-action">Assignee Picks Up Ticket<br><span style="font-size:10px;font-weight:400;">Status → In Progress</span></div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row">
+      <div class="node node-decision">SLA Timer Running<br><span style="font-size:10px;font-weight:400;">Continuous monitoring against deadline</span></div>
+    </div>
+    <div class="arrow-down" style="display:flex; justify-content:center; gap: 80px;">
+      <div style="text-align:center;">
+        <div style="font-size:11px;color:var(--green);font-weight:600;">Within SLA</div>
+        <div>↓</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:11px;color:var(--red);font-weight:600;">SLA Breached</div>
+        <div>↓</div>
+      </div>
+    </div>
+    <div class="flow-row">
+      <div class="node node-action">Continue Processing</div>
+      <span class="arrow" style="font-size:14px;color:var(--text-muted);">or</span>
+      <div class="node node-alert">Escalation Triggered<br><span style="font-size:10px;font-weight:400;">Priority → P1, alert dept head</span></div>
+    </div>
+  </div>
+
+  <!-- STAGE 5: Resolution -->
+  <div class="flow-section">
+    <div class="section-label">Stage 5 — Resolution & Closure</div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row">
+      <div class="node node-action">Assignee Marks Resolved<br><span style="font-size:10px;font-weight:400;">Status → Resolved</span></div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row">
+      <div class="node node-process">Requester Notified<br><span style="font-size:10px;font-weight:400;">Resolution summary sent</span></div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row">
+      <div class="node node-decision">Requester Satisfied?</div>
+    </div>
+    <div class="arrow-down" style="display:flex; justify-content:center; gap: 80px;">
+      <div style="text-align:center;">
+        <div style="font-size:11px;color:var(--green);font-weight:600;">Yes</div>
+        <div>↓</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:11px;color:var(--red);font-weight:600;">No</div>
+        <div>↓</div>
+      </div>
+    </div>
+    <div class="flow-row">
+      <div class="node node-end">Ticket Closed & Archived</div>
+      <span class="arrow" style="font-size:14px;color:var(--text-muted);">or</span>
+      <div class="node node-alert">Reopen → Back to In Progress</div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch sw-channel"></div>Input Channel</div>
+    <div class="legend-item"><div class="legend-swatch sw-process"></div>System Process</div>
+    <div class="legend-item"><div class="legend-swatch sw-decision"></div>Decision / Logic</div>
+    <div class="legend-item"><div class="legend-swatch sw-route"></div>Department Route</div>
+    <div class="legend-item"><div class="legend-swatch sw-action"></div>Action Step</div>
+    <div class="legend-item"><div class="legend-swatch sw-alert"></div>Escalation / Alert</div>
+  </div>
+
+  <!-- Detail Sections -->
+  <div class="detail-section">
+    <h3>Technical Specification Notes</h3>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h4>Request Intake</h4>
+        <p>All channels (email, WhatsApp, SMS, portal, walk-in) converge into a single intake layer. Each submission generates a standardized request object with: requester identity, channel source, timestamp, raw content. A unique ticket ID (REQ-YYYY-XXXX) is assigned immediately.</p>
+      </div>
+      <div class="detail-card">
+        <h4>Taxonomic Categorization</h4>
+        <p>A keyword-scoring engine analyzes the subject and description against category dictionaries (HR, IT, Payroll, Operations). Multi-word matches receive higher weight. A confidence score (0–100%) is computed. Requests below a 40% confidence threshold are flagged for manual review.</p>
+      </div>
+      <div class="detail-card">
+        <h4>Dynamic Routing</h4>
+        <p>Category determines the department queue. Each department has a designated owner (team or individual). Notifications are dispatched to both the assignee and the requester. Round-robin or workload-based assignment can be layered in at scale.</p>
+      </div>
+      <div class="detail-card">
+        <h4>Escalation Protocol</h4>
+        <p>SLA timers are set by priority: P1 (4h), P2 (8h), P3 (24h), P4 (48h). When breached, the ticket auto-escalates to P1, alerts the department head, and flags in the dashboard. A second escalation to senior leadership triggers at 2× the original SLA window.</p>
+      </div>
+      <div class="detail-card">
+        <h4>State Lifecycle</h4>
+        <p>Tickets move through four states: Open → In Progress → Resolved → Closed. Each transition is logged with a timestamp and actor. Reopening a resolved ticket reverts it to In Progress with a new SLA window. Closed tickets are archived and indexed for analytics.</p>
+      </div>
+      <div class="detail-card">
+        <h4>Resolution & Archival</h4>
+        <p>Upon resolution, the requester receives a summary notification. Satisfaction can be captured (thumbs up/down or NPS). Unconfirmed resolutions auto-close after 48 hours. All closed tickets feed into the analytics layer for trend analysis, SLA compliance, and workload insights.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
